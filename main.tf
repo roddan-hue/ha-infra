@@ -168,12 +168,8 @@ resource "aws_launch_configuration" "ha-infra" {
 
               TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
               INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
-              mkdir -p /usr/share/nginx/html
-              echo "<h1>Server: $INSTANCE_ID</h1>" > /usr/share/nginx/html/index.html
 
-              docker run -d --restart unless-stopped -p 80:80 \
-                -v /usr/share/nginx/html/index.html:/usr/share/nginx/html/index.html:ro \
-                nginx:latest
+              docker run -d --restart unless-stopped -p 80:${var.container_port} -e INSTANCE_ID=$INSTANCE_ID ${var.container_image}
             EOF
 
   lifecycle {

@@ -1,6 +1,8 @@
 name: Terraform
 
 on:
+  push:
+    branches: [stage]
   workflow_dispatch:
     inputs:
       action:
