@@ -3,8 +3,7 @@ terraform {
     organization = "bossrod"
 
     workspaces {
-      project = "HA Terraform"
-      name    = "ha-aws"
+      name = "ha-aws"
     }
   }
 
