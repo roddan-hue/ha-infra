@@ -219,7 +219,7 @@ The infrastructure is optimized for technical demonstration while keeping costs 
 | **Data Transfer / Egress** | Minimal | < $1.00 | < $1.50 | Low bandwidth static page traffic. |
 
 > [!TIP]
-> **FinOps Recommendation**: To keep total spending strictly within the **~$20 AUD** budget threshold for interview evaluations, run `terraform apply` when testing or demonstrating, and execute `terraform destroy` when inactive.
+> **FinOps Recommendation**: To keep total spending strictly within the **~$20 AUD** budget threshold, run `terraform apply` when testing or demonstrating, and execute `terraform destroy` when inactive.
 
 ---
 
