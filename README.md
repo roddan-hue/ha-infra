@@ -1,4 +1,4 @@
-﻿# Highly Available & Autohealing AWS Infrastructure (ha-infra)
+# Highly Available & Autohealing AWS Infrastructure (ha-infra)
 
 [![Terraform Pipeline](https://github.com/roddan-hue/ha-infra/actions/workflows/terraform.yml/badge.svg)](https://github.com/roddan-hue/ha-infra/actions/workflows/terraform.yml)
 [![Build and Push Docker Image](https://github.com/roddan-hue/ha-infra/actions/workflows/docker-image.yml/badge.svg)](https://github.com/roddan-hue/ha-infra/actions/workflows/docker-image.yml)
@@ -119,7 +119,7 @@ The repository enforces a structured **Git Flow** with automated quality gates a
 - **Actions**:
   - Builds and tags production Docker image (`ghcr.io/roddan-hue/ha-infra-welcomepage:latest`).
   - Runs `terraform plan` against HCP Terraform workspace.
-- **Deployment**: ⏸️ **Deployment (`terraform apply`) is manual / gated.** To deploy to AWS, trigger the **Terraform** workflow via GitHub Actions `workflow_dispatch` and select `action: apply`.
+- **Deployment**: ⏸️ **Deployment (`terraform apply`) and Teardown (`terraform destroy`) are manual / gated.** To deploy or destroy resources in AWS, navigate to **Actions -> Terraform Pipeline -> Run workflow**, select `action: apply` (or `action: destroy`), and click **Run workflow**.
 
 ---
 
