@@ -127,13 +127,13 @@ The repository enforces a structured **Git Flow** with automated quality gates a
 
 ### 1. AWS & IAM OIDC Setup
 Ensure an IAM Role (`GithubOIDC_Portfolio`) exists in your AWS account with a trust relationship for GitHub Actions OIDC:
-- Policy document location: [iam/github-oidc-terraform-policy.json](file:///c:/Users/rodba/OneDrive/Documents/Projects/ha-infra/iam/github-oidc-terraform-policy.json)
-- Role ARN used in CI/CD: `arn:aws:iam::141172652032:role/GithubOIDC_Portfolio`
+- Policy document location: [iam/github-oidc-terraform-policy.json]
+- Role ARN used in CI/CD: `arn:aws:iam::"YourAWSAccountID":role/"YourGithubOIDC_Role"`
 
 ### 2. GitHub Secrets & Variables Configuration
 In your GitHub repository (`Settings -> Secrets and variables -> Actions`):
 - **Secrets**:
-  - `TF_API_TOKEN`: HCP Terraform API token with access to organization `bossrod`.
+  - `TF_API_TOKEN`: HCP Terraform API token with access to organization.
 - **Variables**:
   - `AWS_REGION`: `ap-southeast-2`
 
