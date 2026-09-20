@@ -5,6 +5,10 @@ on:
     branches: [main, stage]
     paths:
       - "welcomepage/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "welcomepage/**"
   workflow_dispatch:
 
 permissions:
@@ -17,12 +21,14 @@ env:
 
 jobs:
   build-and-push:
+    name: Build & Push Container Image
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -38,11 +44,21 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=stage,enable=${{ github.ref == 'refs/heads/stage' }}
-            type=sha
+            type=sha,enable=true
 
-      - name: Build and push
+      - name: Build image (Validation only on PR)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./welcomepage
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push image (On Push to Stage/Main)
+        if: github.event_name != 'pull_request'
         uses: docker/build-push-action@v6
         with:
           context: ./welcomepage

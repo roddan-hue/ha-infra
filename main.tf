@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source  = "terraform-aws-modules/vpc/aws"
   version = "3.14.0"
 
   name = "my-vpc"
@@ -130,7 +130,7 @@ resource "aws_autoscaling_group" "ha-infra" {
   launch_configuration = aws_launch_configuration.ha-infra.id
 
   # route traffic to ASG instances and let the ALB health check drive replacements
-  target_group_arns        = [aws_lb_target_group.ha-infra.arn]
+  target_group_arns         = [aws_lb_target_group.ha-infra.arn]
   health_check_type         = "ELB"
   health_check_grace_period = 300
 
@@ -154,9 +154,9 @@ resource "aws_autoscaling_policy" "cpu" {
 }
 
 resource "aws_launch_configuration" "ha-infra" {
-  name          = "ha-infra-lc"
-  image_id      = data.aws_ami.latest_amazon_linux.id
-  instance_type = "t2.micro"
+  name            = "ha-infra-lc"
+  image_id        = data.aws_ami.latest_amazon_linux.id
+  instance_type   = "t2.micro"
   security_groups = [aws_security_group.instance.id]
 
   user_data = <<-EOF
@@ -169,7 +169,10 @@ resource "aws_launch_configuration" "ha-infra" {
               TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
               INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
 
-              docker run -d --restart unless-stopped -p 80:${var.container_port} -e INSTANCE_ID=$INSTANCE_ID ${var.container_image}
+              docker run -d --restart unless-stopped -p 80:${var.container_port} \
+                -e INSTANCE_ID=$INSTANCE_ID \
+                -e NG_ALLOWED_HOSTS=* \
+                ${var.container_image}
             EOF
 
   lifecycle {
