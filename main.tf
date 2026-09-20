@@ -127,7 +127,11 @@ resource "aws_autoscaling_group" "ha-infra" {
   max_size             = 3
   min_size             = 2
   vpc_zone_identifier  = module.vpc.private_subnets
-  launch_configuration = aws_launch_configuration.ha-infra.id
+  # launch_configuration = aws_launch_configuration.ha-infra.id
+  launch_template {
+    id      = aws_launch_template.ha_infra.id
+    version = "$Latest"
+  }
 
   # route traffic to ASG instances and let the ALB health check drive replacements
   target_group_arns         = [aws_lb_target_group.ha-infra.arn]
