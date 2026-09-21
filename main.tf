@@ -123,10 +123,10 @@ resource "aws_security_group" "instance" {
 }
 
 resource "aws_autoscaling_group" "ha-infra" {
-  desired_capacity     = 2
-  max_size             = 3
-  min_size             = 2
-  vpc_zone_identifier  = module.vpc.private_subnets
+  desired_capacity    = 2
+  max_size            = 3
+  min_size            = 2
+  vpc_zone_identifier = module.vpc.private_subnets
 
   launch_template {
     id      = aws_launch_template.ha_infra.id
