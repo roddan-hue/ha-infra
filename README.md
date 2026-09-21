@@ -20,7 +20,7 @@ flowchart TD
     subgraph AWS ["☁️ AWS Cloud (ap-southeast-2)"]
         subgraph VPC ["Network VPC (10.0.0.0/16)"]
             IGW["Internet Gateway"]
-            
+
             subgraph PublicAZs ["Public Subnets (3 AZs: 10.0.101.0/24, 10.0.102.0/24, 10.0.103.0/24)"]
                 ALB["Application Load Balancer (ha-infra-lb)"]
                 NAT["Single NAT Gateway"]
@@ -55,9 +55,9 @@ flowchart TD
 | Requirement | Implementation & Design Detail |
 | :--- | :--- |
 | **Self-Healing (Autohealing)** | **ELB Health Checks & ASG Replacement**: The ALB Target Group actively probes instances on HTTP `/` every 30 seconds. The Auto Scaling Group is configured with `health_check_type = "ELB"`. If an application container fails or an instance becomes unhealthy, the ASG automatically terminates the instance and spins up a fresh replacement node. Additionally, Docker runs with `--restart unless-stopped` for process-level recovery. |
-| **Self-Provisioning (IaC)** | **Single-Command Terraform Deployment**: The complete stack (VPC, Subnets, Internet Gateway, NAT Gateway, Security Groups, ALB, Target Groups, Launch Config, ASG, and User Data bootstrapper) is declared in [main.tf](file:///c:/Users/rodba/OneDrive/Documents/Projects/ha-infra/main.tf). Running `terraform apply` provisions everything predictably; subsequent runs produce zero unneeded modifications. |
+| **Self-Provisioning (IaC)** | **Single-Command Terraform Deployment**: The complete stack (VPC, Subnets, Internet Gateway, NAT Gateway, Security Groups, ALB, Target Groups, Launch Template, ASG, and User Data bootstrapper) is declared in `main.tf`. Running `terraform apply` provisions everything predictably; subsequent runs produce zero unneeded modifications. |
 | **N+1 Capacity & HA** | **Multi-AZ Load Balancing**: Traffic is distributed evenly across at least 2 active EC2 instances deployed across multiple Availability Zones behind an Application Load Balancer. If one instance or AZ experiences an outage, 100% of incoming traffic is instantly rerouted to remaining active instances without user-facing downtime. |
-| **Containerized Web Application** | **Angular SSR Docker Container**: The web application ([welcomepage/](file:///c:/Users/rodba/OneDrive/Documents/Projects/ha-infra/welcomepage)) is built into a lightweight multi-stage Alpine Docker image and published to GitHub Container Registry (`ghcr.io`). Cloud-init/User-data installs Docker and pulls the image automatically on instance boot. |
+| **Containerized Web Application** | **Angular SSR Docker Container**: The web application (`welcomepage/`) is built into a lightweight multi-stage Alpine Docker image and published to GitHub Container Registry (`ghcr.io`). Cloud-init/User-data installs Docker and pulls the image automatically on instance boot. |
 
 ---
 
@@ -73,15 +73,23 @@ flowchart TD
   - `ha-infra-instance-sg`: Accepts HTTP ingress on port 80 **strictly from `ha-infra-alb-sg`**. Public internet access directly to instances is blocked.
 
 ### 2. Compute & Scaling
-- **Launch Configuration**: Provisioned with Amazon Linux 2 (`amzn2-ami-hvm-*-x86_64-gp2`), `t2.micro` instance type, and metadata tokens (IMDSv2).
+- **Launch Template**: Provisioned with Amazon Linux 2 (`amzn2-ami-hvm-*-x86_64-gp2`), `t3.micro` instance type, and IMDSv2 token-based metadata access.
 - **User Data Bootstrap**:
   ```bash
   #!/bin/bash
   yum update -y
   amazon-linux-extras install -y docker
   systemctl start docker && systemctl enable docker
+
+  # Fetch instance-id via IMDSv2 (token-based, no IAM permissions needed)
+  TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+    -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  INSTANCE_NAME=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" \
+    http://169.254.169.254/latest/meta-data/instance-id)
+
   docker run -d --restart unless-stopped -p 80:4000 \
     -e NG_ALLOWED_HOSTS=* \
+    -e INSTANCE_ID="$INSTANCE_NAME" \
     ghcr.io/roddan-hue/ha-infra-welcomepage:latest
   ```
 - **Auto Scaling Group**: Configured with `min_size = 2`, `max_size = 3`, `desired_capacity = 2`. CPU Target Tracking scaling policy triggers additional capacity if average CPU utilization exceeds 50%.
@@ -99,7 +107,7 @@ The repository enforces a structured **Git Flow** with automated quality gates a
 [ main branch  ] ──► (Build & Push Docker image:latest)
                           │
                           ▼ Manual Approval / Dispatch
-[ AWS Deployment ] ──► (terraform apply)
+[ AWS Deployment ] ──► (terraform apply / terraform destroy)
 ```
 
 ### 1. `stage` Branch Pipeline
@@ -126,13 +134,14 @@ The repository enforces a structured **Git Flow** with automated quality gates a
 ## Prerequisites & Setup Guide
 
 ### 1. AWS & IAM OIDC Setup
-Ensure an IAM Role (`REDACTED_ROLE_NAME`) exists in your AWS account with a trust relationship for GitHub Actions OIDC:
+Ensure an IAM Role exists in your AWS account with a trust relationship for GitHub Actions OIDC:
 - Policy document location: [iam/github-oidc-terraform-policy.json]
-- Role ARN used in CI/CD: `arn:aws:iam::REDACTED_ACCOUNT_ID:role/REDACTED_ROLE_NAME`
+- Store the Role ARN as a GitHub Actions secret: `AWS_ROLE_ARN`
 
 ### 2. GitHub Secrets & Variables Configuration
 In your GitHub repository (`Settings -> Secrets and variables -> Actions`):
 - **Secrets**:
+  - `AWS_ROLE_ARN`: ARN of the IAM role to assume via OIDC.
   - `TF_API_TOKEN`: HCP Terraform API token with access to organization.
 - **Variables**:
   - `AWS_REGION`: `ap-southeast-2`
@@ -194,9 +203,9 @@ terraform destroy -auto-approve
 To verify the autohealing capability during testing:
 
 1. **Verify Initial Health**:
-   - Access the `alb_url` output in your browser. Traffic will load the Angular Welcome page.
+   - Access the `alb_url` output in your browser. Traffic will load the Angular Welcome page, showing the EC2 instance ID of the serving instance.
 2. **Simulate Application Failure**:
-   - Log into one of the EC2 instances or terminate an EC2 instance directly via the AWS Console or AWS CLI:
+   - Terminate an EC2 instance directly via the AWS Console or AWS CLI:
      ```bash
      aws ec2 terminate-instances --instance-ids <instance-id> --region ap-southeast-2
      ```
@@ -213,18 +222,10 @@ The infrastructure is optimized for technical demonstration while keeping costs 
 
 | Resource | Quantity | Monthly Estimated Cost (USD) | Monthly Estimated Cost (AUD) | FinOps Optimization Strategy |
 | :--- | :---: | :---: | :---: | :--- |
-| **EC2 `t2.micro`** | 2 | $0.00 (AWS Free Tier) / ~$8.35 | ~$12.50 | Covered by AWS 12-month Free Tier (750 hrs/mo). |
+| **EC2 `t3.micro`** | 2 | $0.00 (AWS Free Tier) / ~$8.35 | ~$12.50 | Covered by AWS 12-month Free Tier (750 hrs/mo). |
 | **Application Load Balancer** | 1 | ~$16.20 | ~$24.30 | Delete ALB (`terraform destroy`) when not testing. |
 | **Single NAT Gateway** | 1 | ~$32.40 | ~$48.60 | `single_nat_gateway = true` is enabled to avoid provisioning 3 separate NAT Gateways across AZs. |
 | **Data Transfer / Egress** | Minimal | < $1.00 | < $1.50 | Low bandwidth static page traffic. |
 
 > [!TIP]
 > **FinOps Recommendation**: To keep total spending strictly within the **~$20 AUD** budget threshold, run `terraform apply` when testing or demonstrating, and execute `terraform destroy` when inactive.
-
----
-
-## Production Improvements & Next Steps
-
-1. **Migrate to Launch Templates**: Upgrade from `aws_launch_configuration` to `aws_launch_template` to align with current AWS standards and support launch template versioning.
-2. **HTTPS / SSL Termination**: Attach an AWS Certificate Manager (ACM) SSL certificate to the ALB listener on port 443.
-3. **Auto Scaling Policies**: Add target tracking policy for memory / request count in addition to CPU.
