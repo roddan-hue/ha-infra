@@ -2,15 +2,35 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "Ec2Describe",
+            "Sid": "EC2Describe",
             "Effect": "Allow",
             "Action": [
-                "ec2:Describe*"
+                "ec2:DescribeAvailabilityZones",
+                "ec2:DescribeVpcs",
+                "ec2:DescribeVpcAttribute",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeNatGateways",
+                "ec2:DescribeAddresses",
+                "ec2:DescribeAddressesAttribute",
+                "ec2:DescribeRouteTables",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSecurityGroupRules",
+                "ec2:DescribeNetworkAcls",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeImages",
+                "ec2:DescribeLaunchTemplates",
+                "ec2:DescribeLaunchTemplateVersions",
+                "ec2:DescribeInstances",
+                "ec2:DescribeInstanceTypes",
+                "ec2:DescribeInstanceAttribute",
+                "ec2:DescribeTags",
+                "ec2:DescribePrefixLists"
             ],
             "Resource": "*"
         },
         {
-            "Sid": "Ec2NetworkManage",
+            "Sid": "EC2NetworkManage",
             "Effect": "Allow",
             "Action": [
                 "ec2:CreateVpc",
@@ -36,6 +56,18 @@
                 "ec2:AssociateRouteTable",
                 "ec2:DisassociateRouteTable",
                 "ec2:ReplaceRouteTableAssociation",
+                "ec2:CreateNetworkAclEntry",
+                "ec2:DeleteNetworkAclEntry",
+                "ec2:ReplaceNetworkAclAssociation",
+                "ec2:CreateTags",
+                "ec2:DeleteTags"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EC2SecurityGroupManage",
+            "Effect": "Allow",
+            "Action": [
                 "ec2:CreateSecurityGroup",
                 "ec2:DeleteSecurityGroup",
                 "ec2:AuthorizeSecurityGroupIngress",
@@ -44,20 +76,42 @@
                 "ec2:RevokeSecurityGroupEgress",
                 "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
                 "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
-                "ec2:CreateTags",
-                "ec2:DeleteTags",
-                "ec2:DeleteNetworkAclEntry",
-                "ec2:CreateNetworkAclEntry"
+                "ec2:GetSecurityGroupsForVpc"
             ],
             "Resource": "*"
+        },
+        {
+            "Sid": "EC2LaunchTemplateManage",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateLaunchTemplate",
+                "ec2:DeleteLaunchTemplate",
+                "ec2:ModifyLaunchTemplate",
+                "ec2:CreateLaunchTemplateVersion",
+                "ec2:DeleteLaunchTemplateVersions"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EC2RunInstances",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:RunInstances"
+            ],
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:launch-template/*",
+                "arn:aws:ec2:*:*:volume/*",
+                "arn:aws:ec2:*:*:network-interface/*",
+                "arn:aws:ec2:*:*:security-group/*",
+                "arn:aws:ec2:*:*:subnet/*",
+                "arn:aws:ec2:*::image/*"
+            ]
         },
         {
             "Sid": "AutoScalingManage",
             "Effect": "Allow",
             "Action": [
-                "autoscaling:CreateLaunchConfiguration",
-                "autoscaling:DeleteLaunchConfiguration",
-                "autoscaling:DescribeLaunchConfigurations",
                 "autoscaling:CreateAutoScalingGroup",
                 "autoscaling:UpdateAutoScalingGroup",
                 "autoscaling:DeleteAutoScalingGroup",
@@ -75,7 +129,11 @@
                 "autoscaling:DescribeTags",
                 "autoscaling:DescribeScalingProcessTypes",
                 "autoscaling:SuspendProcesses",
-                "autoscaling:ResumeProcesses"
+                "autoscaling:ResumeProcesses",
+                "autoscaling:DescribeLifecycleHookTypes",
+                "autoscaling:DescribeTerminationPolicyTypes",
+                "autoscaling:DescribeInstanceRefreshes",
+                "autoscaling:DescribeWarmPool"
             ],
             "Resource": "*"
         },
@@ -90,6 +148,9 @@
                 "elasticloadbalancing:ModifyLoadBalancerAttributes",
                 "elasticloadbalancing:SetSecurityGroups",
                 "elasticloadbalancing:SetSubnets",
+                "elasticloadbalancing:AddTags",
+                "elasticloadbalancing:RemoveTags",
+                "elasticloadbalancing:DescribeTags",
                 "elasticloadbalancing:CreateTargetGroup",
                 "elasticloadbalancing:DeleteTargetGroup",
                 "elasticloadbalancing:DescribeTargetGroups",
@@ -102,24 +163,25 @@
                 "elasticloadbalancing:CreateListener",
                 "elasticloadbalancing:DeleteListener",
                 "elasticloadbalancing:DescribeListeners",
-                "elasticloadbalancing:ModifyListener",
-                "elasticloadbalancing:AddTags",
-                "elasticloadbalancing:RemoveTags",
-                "elasticloadbalancing:DescribeTags",
-                "iam:CreateServiceLinkedRole",
-                "ec2:GetSecurityGroupsForVpc",
-                "elasticloadbalancing:DescribeListenerAttributes"
+                "elasticloadbalancing:DescribeListenerAttributes",
+                "elasticloadbalancing:ModifyListener"
             ],
             "Resource": "*"
         },
         {
-            "Sid": "AutoScalingServiceLinkedRole",
+            "Sid": "IAMServiceLinkedRoles",
             "Effect": "Allow",
             "Action": "iam:CreateServiceLinkedRole",
-            "Resource": "arn:aws:iam::*:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+            "Resource": [
+                "arn:aws:iam::*:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+                "arn:aws:iam::*:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing"
+            ],
             "Condition": {
                 "StringLike": {
-                    "iam:AWSServiceName": "autoscaling.amazonaws.com"
+                    "iam:AWSServiceName": [
+                        "autoscaling.amazonaws.com",
+                        "elasticloadbalancing.amazonaws.com"
+                    ]
                 }
             }
         }

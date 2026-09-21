@@ -160,7 +160,7 @@ resource "aws_autoscaling_policy" "cpu" {
 resource "aws_launch_template" "ha_infra" {
   name_prefix   = "ha-infra-"
   image_id      = data.aws_ami.latest_amazon_linux.id
-  instance_type = "t2.micro"
+  instance_type = "t3.micro"
   vpc_security_group_ids = [
     aws_security_group.instance.id,
   ]
