@@ -157,33 +157,6 @@ resource "aws_autoscaling_policy" "cpu" {
   }
 }
 
-# resource "aws_launch_configuration" "ha-infra" {
-#   name            = "ha-infra-lc"
-#   image_id        = data.aws_ami.latest_amazon_linux.id
-#   instance_type   = "t2.micro"
-#   security_groups = [aws_security_group.instance.id]
-
-#   user_data = <<-EOF
-#               #!/bin/bash
-#               yum update -y
-#               amazon-linux-extras install -y docker
-#               systemctl start docker
-#               systemctl enable docker
-
-#               TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-#               INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
-
-#               docker run -d --restart unless-stopped -p 80:${var.container_port} \
-#                 -e INSTANCE_ID=$INSTANCE_ID \
-#                 -e NG_ALLOWED_HOSTS=* \
-#                 ${var.container_image}
-#             EOF
-
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
-
 resource "aws_launch_template" "ha_infra" {
   name_prefix   = "ha-infra-"
   image_id      = data.aws_ami.latest_amazon_linux.id
