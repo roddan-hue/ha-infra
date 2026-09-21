@@ -3,8 +3,8 @@ provider "aws" {
 }
 
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
-  version = "3.14.0"
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
 
   name = "my-vpc"
   cidr = "10.0.0.0/16"
@@ -123,14 +123,18 @@ resource "aws_security_group" "instance" {
 }
 
 resource "aws_autoscaling_group" "ha-infra" {
-  desired_capacity     = 2
-  max_size             = 3
-  min_size             = 2
-  vpc_zone_identifier  = module.vpc.private_subnets
-  launch_configuration = aws_launch_configuration.ha-infra.id
+  desired_capacity    = 2
+  max_size            = 3
+  min_size            = 2
+  vpc_zone_identifier = module.vpc.private_subnets
+
+  launch_template {
+    id      = aws_launch_template.ha_infra.id
+    version = "$Latest"
+  }
 
   # route traffic to ASG instances and let the ALB health check drive replacements
-  target_group_arns        = [aws_lb_target_group.ha-infra.arn]
+  target_group_arns         = [aws_lb_target_group.ha-infra.arn]
   health_check_type         = "ELB"
   health_check_grace_period = 300
 
@@ -153,30 +157,40 @@ resource "aws_autoscaling_policy" "cpu" {
   }
 }
 
-resource "aws_launch_configuration" "ha-infra" {
-  name          = "ha-infra-lc"
+resource "aws_launch_template" "ha_infra" {
+  name_prefix   = "ha-infra-"
   image_id      = data.aws_ami.latest_amazon_linux.id
-  instance_type = "t2.micro"
-  security_groups = [aws_security_group.instance.id]
+  instance_type = "t3.micro"
+  vpc_security_group_ids = [
+    aws_security_group.instance.id,
+  ]
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    yum update -y
+    amazon-linux-extras install -y docker
+    systemctl start docker && systemctl enable docker
 
-  user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              amazon-linux-extras install -y docker
-              systemctl start docker
-              systemctl enable docker
+    # Fetch instance-id via IMDSv2 (token-based, no IAM permissions needed)
+    TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+      -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+    INSTANCE_NAME=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" \
+      http://169.254.169.254/latest/meta-data/instance-id)
 
-              TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-              INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
-              mkdir -p /usr/share/nginx/html
-              echo "<h1>Server: $INSTANCE_ID</h1>" > /usr/share/nginx/html/index.html
-
-              docker run -d --restart unless-stopped -p 80:80 \
-                -v /usr/share/nginx/html/index.html:/usr/share/nginx/html/index.html:ro \
-                nginx:latest
-            EOF
-
+    docker run -d --restart unless-stopped -p 80:4000 \
+      -e NG_ALLOWED_HOSTS=* \
+      -e INSTANCE_ID="$INSTANCE_NAME" \
+      ghcr.io/roddan-hue/ha-infra-welcomepage:latest
+  EOF
+  )
   lifecycle {
     create_before_destroy = true
+  }
+
+  # Makes instance replacement smoother
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "ha-infra"
+    }
   }
 }

@@ -1,6 +1,10 @@
-name: Terraform
+name: Terraform Pipeline
 
 on:
+  push:
+    branches: [stage, main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       action:
@@ -9,26 +13,29 @@ on:
         options:
           - plan
           - apply
+          - destroy
         default: plan
 
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 env:
   AWS_REGION: ap-southeast-2
 
 jobs:
   terraform:
+    name: Terraform Format, Init, Plan & Manual Apply
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::REDACTED_ACCOUNT_ID:role/REDACTED_ROLE_NAME
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
@@ -42,9 +49,16 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+      - name: Terraform Validate
+        run: terraform validate
+
       - name: Terraform Plan
         run: terraform plan -input=false
 
-      - name: Terraform Apply
-        if: github.event.inputs.action == 'apply'
+      - name: Terraform Apply (Manual Trigger Only)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve -input=false
+
+      - name: Terraform Destroy (Manual Trigger Only)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+        run: terraform destroy -auto-approve -input=false

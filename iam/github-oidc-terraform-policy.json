@@ -1,122 +1,189 @@
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "Ec2Describe",
-      "Effect": "Allow",
-      "Action": [
-        "ec2:Describe*"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "Ec2NetworkManage",
-      "Effect": "Allow",
-      "Action": [
-        "ec2:CreateVpc",
-        "ec2:DeleteVpc",
-        "ec2:ModifyVpcAttribute",
-        "ec2:CreateSubnet",
-        "ec2:DeleteSubnet",
-        "ec2:ModifySubnetAttribute",
-        "ec2:CreateInternetGateway",
-        "ec2:DeleteInternetGateway",
-        "ec2:AttachInternetGateway",
-        "ec2:DetachInternetGateway",
-        "ec2:CreateNatGateway",
-        "ec2:DeleteNatGateway",
-        "ec2:AllocateAddress",
-        "ec2:ReleaseAddress",
-        "ec2:AssociateAddress",
-        "ec2:DisassociateAddress",
-        "ec2:CreateRouteTable",
-        "ec2:DeleteRouteTable",
-        "ec2:CreateRoute",
-        "ec2:DeleteRoute",
-        "ec2:AssociateRouteTable",
-        "ec2:DisassociateRouteTable",
-        "ec2:ReplaceRouteTableAssociation",
-        "ec2:CreateSecurityGroup",
-        "ec2:DeleteSecurityGroup",
-        "ec2:AuthorizeSecurityGroupIngress",
-        "ec2:AuthorizeSecurityGroupEgress",
-        "ec2:RevokeSecurityGroupIngress",
-        "ec2:RevokeSecurityGroupEgress",
-        "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
-        "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
-        "ec2:CreateTags",
-        "ec2:DeleteTags"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "AutoScalingManage",
-      "Effect": "Allow",
-      "Action": [
-        "autoscaling:CreateLaunchConfiguration",
-        "autoscaling:DeleteLaunchConfiguration",
-        "autoscaling:DescribeLaunchConfigurations",
-        "autoscaling:CreateAutoScalingGroup",
-        "autoscaling:UpdateAutoScalingGroup",
-        "autoscaling:DeleteAutoScalingGroup",
-        "autoscaling:DescribeAutoScalingGroups",
-        "autoscaling:DescribeAutoScalingInstances",
-        "autoscaling:DescribeScalingActivities",
-        "autoscaling:PutScalingPolicy",
-        "autoscaling:DeletePolicy",
-        "autoscaling:DescribePolicies",
-        "autoscaling:AttachLoadBalancerTargetGroups",
-        "autoscaling:DetachLoadBalancerTargetGroups",
-        "autoscaling:DescribeLoadBalancerTargetGroups",
-        "autoscaling:CreateOrUpdateTags",
-        "autoscaling:DeleteTags",
-        "autoscaling:DescribeTags",
-        "autoscaling:DescribeScalingProcessTypes",
-        "autoscaling:SuspendProcesses",
-        "autoscaling:ResumeProcesses"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "ElasticLoadBalancingManage",
-      "Effect": "Allow",
-      "Action": [
-        "elasticloadbalancing:CreateLoadBalancer",
-        "elasticloadbalancing:DeleteLoadBalancer",
-        "elasticloadbalancing:DescribeLoadBalancers",
-        "elasticloadbalancing:DescribeLoadBalancerAttributes",
-        "elasticloadbalancing:ModifyLoadBalancerAttributes",
-        "elasticloadbalancing:SetSecurityGroups",
-        "elasticloadbalancing:SetSubnets",
-        "elasticloadbalancing:CreateTargetGroup",
-        "elasticloadbalancing:DeleteTargetGroup",
-        "elasticloadbalancing:DescribeTargetGroups",
-        "elasticloadbalancing:DescribeTargetGroupAttributes",
-        "elasticloadbalancing:ModifyTargetGroup",
-        "elasticloadbalancing:ModifyTargetGroupAttributes",
-        "elasticloadbalancing:RegisterTargets",
-        "elasticloadbalancing:DeregisterTargets",
-        "elasticloadbalancing:DescribeTargetHealth",
-        "elasticloadbalancing:CreateListener",
-        "elasticloadbalancing:DeleteListener",
-        "elasticloadbalancing:DescribeListeners",
-        "elasticloadbalancing:ModifyListener",
-        "elasticloadbalancing:AddTags",
-        "elasticloadbalancing:RemoveTags",
-        "elasticloadbalancing:DescribeTags"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "AutoScalingServiceLinkedRole",
-      "Effect": "Allow",
-      "Action": "iam:CreateServiceLinkedRole",
-      "Resource": "arn:aws:iam::*:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
-      "Condition": {
-        "StringLike": {
-          "iam:AWSServiceName": "autoscaling.amazonaws.com"
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "EC2Describe",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeAvailabilityZones",
+                "ec2:DescribeVpcs",
+                "ec2:DescribeVpcAttribute",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeNatGateways",
+                "ec2:DescribeAddresses",
+                "ec2:DescribeAddressesAttribute",
+                "ec2:DescribeRouteTables",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSecurityGroupRules",
+                "ec2:DescribeNetworkAcls",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeImages",
+                "ec2:DescribeLaunchTemplates",
+                "ec2:DescribeLaunchTemplateVersions",
+                "ec2:DescribeInstances",
+                "ec2:DescribeInstanceTypes",
+                "ec2:DescribeInstanceAttribute",
+                "ec2:DescribeTags",
+                "ec2:DescribePrefixLists"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EC2NetworkManage",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateVpc",
+                "ec2:DeleteVpc",
+                "ec2:ModifyVpcAttribute",
+                "ec2:CreateSubnet",
+                "ec2:DeleteSubnet",
+                "ec2:ModifySubnetAttribute",
+                "ec2:CreateInternetGateway",
+                "ec2:DeleteInternetGateway",
+                "ec2:AttachInternetGateway",
+                "ec2:DetachInternetGateway",
+                "ec2:CreateNatGateway",
+                "ec2:DeleteNatGateway",
+                "ec2:AllocateAddress",
+                "ec2:ReleaseAddress",
+                "ec2:AssociateAddress",
+                "ec2:DisassociateAddress",
+                "ec2:CreateRouteTable",
+                "ec2:DeleteRouteTable",
+                "ec2:CreateRoute",
+                "ec2:DeleteRoute",
+                "ec2:AssociateRouteTable",
+                "ec2:DisassociateRouteTable",
+                "ec2:ReplaceRouteTableAssociation",
+                "ec2:CreateNetworkAclEntry",
+                "ec2:DeleteNetworkAclEntry",
+                "ec2:ReplaceNetworkAclAssociation",
+                "ec2:CreateTags",
+                "ec2:DeleteTags"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EC2SecurityGroupManage",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateSecurityGroup",
+                "ec2:DeleteSecurityGroup",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+                "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+                "ec2:GetSecurityGroupsForVpc"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EC2LaunchTemplateManage",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateLaunchTemplate",
+                "ec2:DeleteLaunchTemplate",
+                "ec2:ModifyLaunchTemplate",
+                "ec2:CreateLaunchTemplateVersion",
+                "ec2:DeleteLaunchTemplateVersions"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EC2RunInstances",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:RunInstances"
+            ],
+            "Resource": [
+                "arn:aws:ec2:*:*:instance/*",
+                "arn:aws:ec2:*:*:launch-template/*",
+                "arn:aws:ec2:*:*:volume/*",
+                "arn:aws:ec2:*:*:network-interface/*",
+                "arn:aws:ec2:*:*:security-group/*",
+                "arn:aws:ec2:*:*:subnet/*",
+                "arn:aws:ec2:*::image/*"
+            ]
+        },
+        {
+            "Sid": "AutoScalingManage",
+            "Effect": "Allow",
+            "Action": [
+                "autoscaling:CreateAutoScalingGroup",
+                "autoscaling:UpdateAutoScalingGroup",
+                "autoscaling:DeleteAutoScalingGroup",
+                "autoscaling:DescribeAutoScalingGroups",
+                "autoscaling:DescribeAutoScalingInstances",
+                "autoscaling:DescribeScalingActivities",
+                "autoscaling:PutScalingPolicy",
+                "autoscaling:DeletePolicy",
+                "autoscaling:DescribePolicies",
+                "autoscaling:AttachLoadBalancerTargetGroups",
+                "autoscaling:DetachLoadBalancerTargetGroups",
+                "autoscaling:DescribeLoadBalancerTargetGroups",
+                "autoscaling:CreateOrUpdateTags",
+                "autoscaling:DeleteTags",
+                "autoscaling:DescribeTags",
+                "autoscaling:DescribeScalingProcessTypes",
+                "autoscaling:SuspendProcesses",
+                "autoscaling:ResumeProcesses",
+                "autoscaling:DescribeLifecycleHookTypes",
+                "autoscaling:DescribeTerminationPolicyTypes",
+                "autoscaling:DescribeInstanceRefreshes",
+                "autoscaling:DescribeWarmPool"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ElasticLoadBalancingManage",
+            "Effect": "Allow",
+            "Action": [
+                "elasticloadbalancing:CreateLoadBalancer",
+                "elasticloadbalancing:DeleteLoadBalancer",
+                "elasticloadbalancing:DescribeLoadBalancers",
+                "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                "elasticloadbalancing:SetSecurityGroups",
+                "elasticloadbalancing:SetSubnets",
+                "elasticloadbalancing:AddTags",
+                "elasticloadbalancing:RemoveTags",
+                "elasticloadbalancing:DescribeTags",
+                "elasticloadbalancing:CreateTargetGroup",
+                "elasticloadbalancing:DeleteTargetGroup",
+                "elasticloadbalancing:DescribeTargetGroups",
+                "elasticloadbalancing:DescribeTargetGroupAttributes",
+                "elasticloadbalancing:ModifyTargetGroup",
+                "elasticloadbalancing:ModifyTargetGroupAttributes",
+                "elasticloadbalancing:RegisterTargets",
+                "elasticloadbalancing:DeregisterTargets",
+                "elasticloadbalancing:DescribeTargetHealth",
+                "elasticloadbalancing:CreateListener",
+                "elasticloadbalancing:DeleteListener",
+                "elasticloadbalancing:DescribeListeners",
+                "elasticloadbalancing:DescribeListenerAttributes",
+                "elasticloadbalancing:ModifyListener"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "IAMServiceLinkedRoles",
+            "Effect": "Allow",
+            "Action": "iam:CreateServiceLinkedRole",
+            "Resource": [
+                "arn:aws:iam::*:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
+                "arn:aws:iam::*:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing"
+            ],
+            "Condition": {
+                "StringLike": {
+                    "iam:AWSServiceName": [
+                        "autoscaling.amazonaws.com",
+                        "elasticloadbalancing.amazonaws.com"
+                    ]
+                }
+            }
         }
-      }
-    }
-  ]
+    ]
 }
