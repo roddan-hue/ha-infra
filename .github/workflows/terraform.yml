@@ -13,6 +13,7 @@ on:
         options:
           - plan
           - apply
+          - destroy
         default: plan
 
 permissions:
@@ -57,3 +58,7 @@ jobs:
       - name: Terraform Apply (Manual Trigger Only)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve -input=false
+
+      - name: Terraform Destroy (Manual Trigger Only)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+        run: terraform destroy -auto-approve -input=false

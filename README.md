@@ -128,7 +128,7 @@ The repository enforces a structured **Git Flow** with automated quality gates a
 ### 1. AWS & IAM OIDC Setup
 Ensure an IAM Role (`REDACTED_ROLE_NAME`) exists in your AWS account with a trust relationship for GitHub Actions OIDC:
 - Policy document location: [iam/github-oidc-terraform-policy.json]
-- Role ARN used in CI/CD: `arn:aws:iam::"YourAWSAccountID":role/"YourGithubOIDC_Role"`
+- Role ARN used in CI/CD: `arn:aws:iam::REDACTED_ACCOUNT_ID:role/REDACTED_ROLE_NAME`
 
 ### 2. GitHub Secrets & Variables Configuration
 In your GitHub repository (`Settings -> Secrets and variables -> Actions`):
