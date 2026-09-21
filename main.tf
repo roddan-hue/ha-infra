@@ -169,8 +169,16 @@ resource "aws_launch_template" "ha_infra" {
     yum update -y
     amazon-linux-extras install -y docker
     systemctl start docker && systemctl enable docker
+
+    # Fetch instance-id via IMDSv2 (token-based, no IAM permissions needed)
+    TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+      -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+    INSTANCE_NAME=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" \
+      http://169.254.169.254/latest/meta-data/instance-id)
+
     docker run -d --restart unless-stopped -p 80:4000 \
       -e NG_ALLOWED_HOSTS=* \
+      -e INSTANCE_ID="$INSTANCE_NAME" \
       ghcr.io/roddan-hue/ha-infra-welcomepage:latest
   EOF
   )
