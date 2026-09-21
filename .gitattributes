@@ -1,0 +1,21 @@
+# Normalize all text files to LF on commit (cross-platform consistency)
+* text=auto eol=lf
+
+# Explicitly handle common text file types
+*.tf        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.md        text eol=lf
+*.json      text eol=lf
+*.ts        text eol=lf
+*.html      text eol=lf
+*.css       text eol=lf
+*.sh        text eol=lf
+
+# Binary files — never touch line endings
+*.png       binary
+*.jpg       binary
+*.gif       binary
+*.ico       binary
+*.zip       binary
+*.lock      text eol=lf
